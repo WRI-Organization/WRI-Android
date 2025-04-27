@@ -6,3 +6,4 @@ const kTransparentColor = Color(0x00ffffff);
 const backArrowGray = Color(0xFFACACAC);
 const tabBarColor =  Color(0xFF727A87);
 const tabBarIndicatorColor =  Color(0xFFE6E6E6);
+const countryInfoTextColor =  Color(0xFF444444);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wri/presentation/providers/country_info_provider.dart';
+import 'package:wri/presentation/screens/widget/expand_text.dart';
 import 'package:wri/presentation/screens/widget/tab_bar_delegate.dart';
 
 import '../../common/color.dart';
@@ -22,6 +23,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     tabController = TabController(length: 5, vsync: this);
+    countryInfoProvider.loadCountryInfoModel(titles: '가나');
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       countryInfoProvider.addListener(updateScreen);
     },);
@@ -108,28 +110,31 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
             SliverPersistentHeader(
               pinned: true,
               delegate: TabBarDelegate(
-                widget: TabBar(
-                  controller: tabController,
-                  padding: EdgeInsets.symmetric(horizontal: 15),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: tabBarIndicatorColor,
-                  indicatorColor: kBlack,
-                  onTap: (value) {
-                    // TODO
-                  },
-                  labelColor: kBlack,
-                  unselectedLabelColor: tabBarColor,
-                  labelStyle: TextStyle(
-                    fontFamily: 'inter',
-                    fontWeight: FontWeight.w700,
+                widget: Container(
+                  color: Colors.white,
+                  child: TabBar(
+                    controller: tabController,
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: tabBarIndicatorColor,
+                    indicatorColor: kBlack,
+                    onTap: (value) {
+                      setState(() {});
+                    },
+                    labelColor: kBlack,
+                    unselectedLabelColor: tabBarColor,
+                    labelStyle: TextStyle(
+                      fontFamily: 'inter',
+                      fontWeight: FontWeight.w700,
+                    ),
+                    tabs: [
+                      Tab(text: '소개', ),
+                      Tab(text: '정보', ),
+                      Tab(text: '환율', ),
+                      Tab(text: '여행지', ),
+                      Tab(text: '항공편', ),
+                    ],
                   ),
-                  tabs: [
-                    Tab(text: '소개', ),
-                    Tab(text: '정보', ),
-                    Tab(text: '환율', ),
-                    Tab(text: '여행지', ),
-                    Tab(text: '항공편', ),
-                  ],
                 )
               ),
             ),
@@ -144,7 +149,26 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                       child: TabBarView(
                         controller: tabController,
                         children: [
-                          Container(),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${countryInfoProvider.countryInfoModel?.pages.values.first.title} (Africa)',
+                                      style: TextStyle(
+                                        fontFamily: 'inter',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 30
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                expandText(text: countryInfoProvider.countryInfoModel?.pages.values.first.extract ?? '')
+                              ],
+                            ),
+                          ),
                           Container(),
                           Container(),
                           Container(),
