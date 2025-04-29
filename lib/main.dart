@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wri/presentation/screens/country_info.dart';
+import 'package:wri/presentation/screens/main_tab.dart';
 
 void main() {
-  runApp(MaterialApp(home: CountryInfo(),));
+  runApp(MaterialApp(home: MainTab(),));
 }

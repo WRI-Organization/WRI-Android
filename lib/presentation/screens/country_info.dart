@@ -64,7 +64,8 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
             SliverAppBar(
               expandedHeight: heightMedia * 0.3,
               flexibleSpace: FlexibleSpaceBar(
-                background: SizedBox(
+                background: Container(
+                  color: kBackgroundColor,
                   height: heightMedia * 0.3,
                   width: widthMedia,
                   child: Stack(
@@ -90,15 +91,15 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                           width: widthMedia,
                           height: heightMedia * 0.18,
                           decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    kTransparentColor,
-                                    kBackgroundColor,
-                                    kBackgroundColor,
-                                  ]
-                              )
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                kTransparentColor,
+                                kBackgroundColor,
+                                kBackgroundColor,
+                              ],
+                            ),
                           ),
                         ),
                       ), // 리니얼 그라디언트
@@ -106,13 +107,15 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),
+            ), // 국기 이미지
             SliverPersistentHeader(
               pinned: true,
               delegate: TabBarDelegate(
                 widget: Container(
-                  color: Colors.white,
+                  color: kBackgroundColor,
                   child: TabBar(
+                    tabAlignment: TabAlignment.center,
+                    isScrollable: true,
                     controller: tabController,
                     padding: EdgeInsets.symmetric(horizontal: 15),
                     indicatorSize: TabBarIndicatorSize.tab,
@@ -126,6 +129,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                     labelStyle: TextStyle(
                       fontFamily: 'inter',
                       fontWeight: FontWeight.w700,
+                      overflow: TextOverflow.visible,
                     ),
                     tabs: [
                       Tab(text: '소개', ),
@@ -137,7 +141,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                   ),
                 )
               ),
-            ),
+            ), // 탭바
             SliverToBoxAdapter(
               child: Column(
                 children: [
@@ -164,8 +168,10 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   ],
-                                ),
-                                expandText(text: countryInfoProvider.countryInfoModel?.pages.values.first.extract ?? '')
+                                ), // 나라 이름
+                                expandText(
+                                  text: countryInfoProvider.countryInfoModel?.pages.values.first.extract ?? '',
+                                ), // 나라 상세 설명
                               ],
                             ),
                           ),
