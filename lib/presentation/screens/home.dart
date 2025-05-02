@@ -69,6 +69,11 @@ class _TestState extends State<Home> {
                         SizedBox(width: widthMedia * 0.05,),
                         Expanded(
                           child: TextField(
+                            onChanged: (value) async {
+                              if (value.isEmpty) {
+                                await homeProvider.loadSearchData();
+                              }
+                            },
                             controller: homeProvider.searchCountryController,
                             style: TextStyle(
                               fontFamily: 'inter',
@@ -87,8 +92,8 @@ class _TestState extends State<Home> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
-          
+                          onTap: () async {
+                            await homeProvider.loadSearchData();
                           },
                           child: Icon(Icons.search_rounded, color: searchIconColor,),
                         ),
@@ -97,193 +102,304 @@ class _TestState extends State<Home> {
                     ),
                   ),
                 ), // 검색창
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(18)),
-                    child: Image.asset(
-                      'assets/ad_banner.png',
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ), // 광고 배너
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        height: 100,
-                        width: 70,
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: Image.asset(
-                                'assets/air_plane.png'
+                homeProvider.searchModel?.state ?? false ?
+                Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '검색결과 ',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: kBlack
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: homeProvider.searchModel?.state ?? false ?
+                                  '${homeProvider.searchModel?.data.length}' : '0',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w700,
+                                    color: kBlack
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '개',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: kBlack,
+                                  ),
+                                ),
+                              ]
+                            )
+                          ),
+                        ],
+                      ),
+                    ), // 검색결과
+                    SizedBox(
+                      width: widthMedia,
+                      height: heightMedia * 0.6,
+                      child: ListView.builder(
+                       itemCount: homeProvider.searchModel?.data.length,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  homeProvider.pushCountryInfo(context, homeProvider.searchModel!.data[index].country_code);
+                                },
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                                      child: Builder(
+                                        builder: (context) {
+                                          final flagUrl = homeProvider.searchModel?.data[index].flag_url;
+                                          if (flagUrl == null || flagUrl.isEmpty) {
+                                            return Container(
+                                              width: 60,
+                                              height: 90,
+                                              color: futureBuilderColor,
+                                            );
+                                          }
+                                          return Image.network(
+                                            '${homeProvider.searchModel?.data[index].flag_url}',
+                                            height: 60,
+                                            width: 90,
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return Container(
+                                                width: 60,
+                                                height: 90,
+                                                color: futureBuilderColor,
+                                              );
+                                            },
+                                          );
+                                        }
+                                      ),
+                                    ), // 국기
+                                    SizedBox(width: 10,),
+                                    Flexible(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${homeProvider.searchModel?.data[index].country_nm}',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontFamily: 'inter',
+                                              fontWeight: FontWeight.w700,
+                                              color: searchDataTextColor
+                                            ),
+                                          ), // 나라 이름
+                                          Text(
+                                            overflow: TextOverflow.ellipsis,
+                                            '${homeProvider.searchModel?.data[index].country_nm}는 ${homeProvider.searchModel?.data[index].continent_nm} 대륙에 위치 해있는 나라 입니다.',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: 'inter',
+                                                fontWeight: FontWeight.w400,
+                                                color: moreInfoTextColor
+                                            ),
+                                          ), // 나라 정보
+                                          homeProvider.searchModel!.data[index].alarm_level <= 2 ?
+                                          Row(
+                                            children: [
+                                              Text(
+                                                '안전 ',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily: 'inter',
+                                                  fontWeight: FontWeight.w400,
+                                                  color: searchSafeColor
+                                                ),
+                                              ),
+                                              SvgPicture.asset(
+                                                'assets/badge_check.svg',
+                                                width: 15,
+                                                height: 15,
+                                                colorFilter: ColorFilter.mode(
+                                                  searchSafeColor,
+                                                  BlendMode.srcIn,
+                                                ),
+                                              ),
+                                            ],
+                                          ) : SizedBox()
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                            Spacer(flex: 2,),
-                            Text(
-                              '항공권',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w400,
-                                color: itemTextColor
-                              ),
-                            ),
-                            Spacer(),
-                          ],
+                              SizedBox(height: 15,)
+                            ],
+                          );
+                        }
+                      ),
+                    )
+                  ],
+                ) : // 검색 결과
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(18)),
+                        child: Image.asset(
+                          'assets/ad_banner.png',
+                          height: 150,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      Spacer(),
-                      SizedBox(
-                        height: 100,
-                        width: 70,
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: Image.asset(
-                                'assets/exchange_rate.png'
-                              ),
-                            ),
-                            Spacer(flex: 2,),
-                            Text(
-                              '환율',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w400,
-                                color: itemTextColor
-                              ),
-                            ),
-                            Spacer(),
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      SizedBox(
-                        height: 100,
-                        width: 70,
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: Image.asset(
-                                'assets/roaming.png'
-                              ),
-                            ),
-                            Spacer(flex: 2,),
-                            Text(
-                              '로밍',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w400,
-                                color: itemTextColor
-                              ),
-                            ),
-                            Spacer(),
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      SizedBox(
-                        height: 100,
-                        width: 70,
-                        child: Column(
-                          children: [
-                            ClipOval(
-                              child: Image.asset(
-                                'assets/event.png'
-                              ),
-                            ),
-                            Spacer(flex: 2,),
-                            Text(
-                              '이벤트',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w400,
-                                color: itemTextColor
-                              ),
-                            ),
-                            Spacer(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ), // 아이템
-                SizedBox(height: heightMedia * 0.03,),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      Text(
-                        '어디로 가볼까?',
-                        style: TextStyle(
-                          fontFamily: 'inter',
-                          fontWeight: FontWeight.w600,
-                          color: kBlack,
-                          fontSize: 20
-                        ),
-                      ),
-                      Spacer(),
-                      Container(
-                        width: 95,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          color: textFiledColor,
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '더 보기',
-                            style: TextStyle(
-                              fontFamily: 'inter',
-                              fontWeight: FontWeight.w400,
-                              color: moreInfoTextColor,
+                    ), // 광고 배너
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            height: 100,
+                            width: 70,
+                            child: Column(
+                              children: [
+                                ClipOval(
+                                  child: Image.asset(
+                                    'assets/air_plane.png'
+                                  ),
+                                ),
+                                Spacer(flex: 2,),
+                                Text(
+                                  '항공권',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: itemTextColor
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
                             ),
                           ),
-                        ),
+                          Spacer(),
+                          SizedBox(
+                            height: 100,
+                            width: 70,
+                            child: Column(
+                              children: [
+                                ClipOval(
+                                  child: Image.asset(
+                                    'assets/exchange_rate.png'
+                                  ),
+                                ),
+                                Spacer(flex: 2,),
+                                Text(
+                                  '환율',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: itemTextColor
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
+                            ),
+                          ),
+                          Spacer(),
+                          SizedBox(
+                            height: 100,
+                            width: 70,
+                            child: Column(
+                              children: [
+                                ClipOval(
+                                  child: Image.asset(
+                                    'assets/roaming.png'
+                                  ),
+                                ),
+                                Spacer(flex: 2,),
+                                Text(
+                                  '로밍',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: itemTextColor
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
+                            ),
+                          ),
+                          Spacer(),
+                          SizedBox(
+                            height: 100,
+                            width: 70,
+                            child: Column(
+                              children: [
+                                ClipOval(
+                                  child: Image.asset(
+                                    'assets/event.png'
+                                  ),
+                                ),
+                                Spacer(flex: 2,),
+                                Text(
+                                  '이벤트',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontWeight: FontWeight.w400,
+                                    color: itemTextColor
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ), // 어디로 가볼까?
-                /*
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '검색결과 ',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w400,
-                                color: kBlack
-                              ),
+                    ), // 아이템
+                    SizedBox(height: heightMedia * 0.03,),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Text(
+                            '어디로 가볼까?',
+                            style: TextStyle(
+                              fontFamily: 'inter',
+                              fontWeight: FontWeight.w600,
+                              color: kBlack,
+                              fontSize: 20
                             ),
-                            TextSpan(
-                              text: '12',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontWeight: FontWeight.w700,
-                                color: kBlack
-                              ),
+                          ),
+                          Spacer(),
+                          Container(
+                            width: 95,
+                            height: 35,
+                            decoration: BoxDecoration(
+                              color: textFiledColor,
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
                             ),
-                            TextSpan(
-                              text: ' 개 ',
-                              style: TextStyle(
+                            child: Center(
+                              child: Text(
+                                '더 보기',
+                                style: TextStyle(
                                   fontFamily: 'inter',
                                   fontWeight: FontWeight.w400,
-                                  color: kBlack
+                                  color: moreInfoTextColor,
+                                ),
                               ),
                             ),
-                          ]
-                        )
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ), // 검색 결과 */ // TODO
+                    ),
+                    SizedBox(height: 500,)
+                  ],
+                ), // 어디로 가볼까?
               ],
             ),
           ),

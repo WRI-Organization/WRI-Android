@@ -9,9 +9,19 @@ class CountryInfoService {
 
   final client = Client();
 
-  Future<CountryInfoModel?> getCountryInfoModel({required String titles}) async {
+  Future<CountryInfoModel?> postCountryInfoModel({required String country}) async {
     try {
-      final response = await client.get(Uri.parse('https://ko.wikipedia.org/w/api.php?action=query&prop=extracts&titles=$titles&format=json&exintro=1&explaintext=1&origin=*'), );
+
+      final header = {
+        "Content-Type": "application/json"
+      };
+
+      final body = jsonEncode({
+        "iso": country,
+        "secretKey": "5\$OyAt9dy2QS95pg"
+      });
+
+      final response = await client.post(Uri.parse('http://10.0.2.2:3000/api/infoData/'), headers: header, body: body);
 
       if (response.statusCode != 200) {
         log('response is not 200 : ${response.statusCode}');
@@ -24,7 +34,7 @@ class CountryInfoService {
       return jsonBody;
 
     } catch (e, t) {
-      log('getCountryInfoModel', error: e, stackTrace: t);
+      log('postCountryInfoModel', error: e, stackTrace: t);
       return null;
     }
   }

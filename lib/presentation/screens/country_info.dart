@@ -23,7 +23,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     tabController = TabController(length: 5, vsync: this);
-    countryInfoProvider.loadCountryInfoModel(titles: '가나');
+    countryInfoProvider.loadCountryInfoModel();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       countryInfoProvider.addListener(updateScreen);
     },);
@@ -44,14 +44,19 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
       appBar: AppBar(
         surfaceTintColor: kBackgroundColor,
         backgroundColor: kBackgroundColor,
-        leading: Icon(
-          Icons.arrow_back_ios,
-          color: backArrowGray,
-          size: 24,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Icon(
+            Icons.arrow_back_ios,
+            color: backArrowGray,
+            size: 24,
+          ),
         ),
         titleSpacing: -15,
         title: Text(
-            '가나',
+            '${countryInfoProvider.countryInfoModel?.data.country_name}',
           style: TextStyle(
             fontFamily: 'inter',
             fontWeight: FontWeight.w400,
@@ -62,6 +67,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
+              automaticallyImplyLeading: false,
               expandedHeight: heightMedia * 0.3,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
@@ -80,9 +86,29 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                       ), // 세계 지도
                       Positioned(
                         top: 20,
-                        child: Image.network(
-                          'https://opendata.mofa.go.kr:8444/fileDownload/images/country_images/flags/15/20220318_161935687.gif',
-                          width: widthMedia * 0.5,
+                        child: Builder(
+                          builder: (context) {
+                            final flagUrl = countryInfoProvider.countryInfoModel?.data.flag_url;
+                            if (flagUrl == null || flagUrl.isEmpty) {
+                              return Container(
+                                width: 180,
+                                height: 120,
+                                color: futureBuilderColor,
+                              );
+                            }
+                            return Image.network(
+                              '${countryInfoProvider.countryInfoModel?.data.flag_url}',
+                              width: 180,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  width: 180,
+                                  height: 120,
+                                  color: futureBuilderColor,
+                                );
+                              },
+                            );
+                          }
                         ),
                       ), // 국기
                       Positioned(
@@ -160,7 +186,7 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                                 Row(
                                   children: [
                                     Text(
-                                      '${countryInfoProvider.countryInfoModel?.pages.values.first.title} (Africa)',
+                                      '${countryInfoProvider.countryInfoModel?.data.country_name} (${countryInfoProvider.countryInfoModel?.data.continent})',
                                       style: TextStyle(
                                         fontFamily: 'inter',
                                         fontWeight: FontWeight.w700,
@@ -170,8 +196,133 @@ class _TestState extends State<CountryInfo> with TickerProviderStateMixin {
                                   ],
                                 ), // 나라 이름
                                 expandText(
-                                  text: countryInfoProvider.countryInfoModel?.pages.values.first.extract ?? '',
+                                  text: countryInfoProvider.countryInfoModel?.data.extract ?? '',
                                 ), // 나라 상세 설명
+                                SizedBox(height: heightMedia * 0.1),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '여행 경보',
+                                        style: TextStyle(
+                                          fontFamily: 'inter',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.warning_rounded,
+                                        size: 16,
+                                      ),
+                                      Spacer(),
+                                      GestureDetector(
+                                        onTap: () {
+                                          showDialog(context: context, builder: (context) {
+                                            return Dialog(
+                                              insetPadding: EdgeInsets.symmetric(horizontal: 20),
+                                              child: Builder(
+                                                  builder: (context) {
+                                                    final flagUrl = countryInfoProvider.countryInfoModel?.data.dang_map_download_url;
+                                                    if (flagUrl == null || flagUrl.isEmpty) {
+                                                      return Container(
+                                                        width: widthMedia,
+                                                        height: 344.0,
+                                                        color: futureBuilderColor,
+                                                      );
+                                                    }
+                                                    return Container(
+                                                      width: widthMedia,
+                                                      height: widthMedia,
+                                                      decoration: BoxDecoration(
+                                                        color: kBackgroundColor,
+                                                        borderRadius: BorderRadius.all(Radius.circular(24)),
+                                                      ),
+                                                      child: Column(
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                                            child: Image.network(
+                                                              'http://10.188.141.251:3000${countryInfoProvider.countryInfoModel?.data.dang_map_download_url}',
+                                                              width: widthMedia,
+                                                              loadingBuilder: (context, child, loadingProgress) {
+                                                                if (loadingProgress == null) return child;
+                                                                return Container(
+                                                                  width: widthMedia,
+                                                                  height: 344.0,
+                                                                  color: futureBuilderColor,
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            child: GestureDetector(
+                                                              onTap: () {
+                                                                Navigator.of(context).pop();
+                                                              },
+                                                              child: Container(
+                                                                width: widthMedia,
+                                                                decoration: BoxDecoration(
+                                                                  color: dialogBackgroundColor,
+                                                                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(24))
+                                                                ),
+                                                                child: Center(
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                                                                    child: Container(
+                                                                      width: widthMedia,
+                                                                      height: 35,
+                                                                      decoration: BoxDecoration(
+                                                                        color: kBackgroundColor,
+                                                                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                                      ),
+                                                                      child: Center(
+                                                                        child: Text(
+                                                                          '닫기',
+                                                                          style: TextStyle(
+                                                                            fontFamily: 'inter',
+                                                                            fontWeight: FontWeight.w500,
+                                                                            fontSize: 12
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }
+                                              ),
+                                            );
+                                          },);
+                                        },
+                                        child: Container(
+                                          width: 95,
+                                          height: 26,
+                                          decoration: BoxDecoration(
+                                            color: textFiledColor,
+                                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '지도보기',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontFamily: 'inter',
+                                                fontWeight: FontWeight.w500,
+                                                color: openMapColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),

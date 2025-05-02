@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wri/common/color.dart';
 import 'package:wri/presentation/providers/main_tab_provider.dart';
-import 'package:wri/presentation/screens/country_info.dart';
 import 'package:wri/presentation/screens/home.dart';
 
 class MainTab extends StatefulWidget {
@@ -40,8 +39,8 @@ class _TestState extends State<MainTab> {
         index: mainTabProvider.currentIndex,
         children: [
           Home(),
-          CountryInfo(),
-          Scaffold(backgroundColor: Colors.blue,),
+          Scaffold(),
+          Scaffold(),
           Scaffold(),
           Scaffold(),
         ],
